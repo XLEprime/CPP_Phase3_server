@@ -162,18 +162,21 @@ QString UserManage::queryItem(const QJsonObject &token, const QJsonObject &filte
     return {};
 }
 
-QString UserManage::registerUser(const QJsonObject &token, const QString &username, const QString &password, int type, const QString &name, const QString &phoneNumber, const QString &address) const
+QString UserManage::registerUser(const QJsonObject &token, const QJsonObject &info) const
 {
-    if (username.isEmpty() || username.size() > 10)
+    if (!info.contains("username") || !info.contains("password") || !info.contains("type") || !info.contains("name") || !info.contains("phonenumber") || !info.contains("address"))
+        return "用户信息不全";
+
+    if (info["username"].toString().isEmpty() || info["username"].toString().size() > 10)
         return "用户名长度应该在1~10之间";
-    if (db->queryUserByName(username))
+    if (db->queryUserByName(info["username"].toString()))
         return "该用户名已被注册";
 
     QSharedPointer<User> user;
-    switch (type)
+    switch (info["type"].toInt())
     {
     case CUSTOMER:
-        user = QSharedPointer<Customer>::create(username, password, 0, name, phoneNumber, address);
+        user = QSharedPointer<Customer>::create(info["username"].toString(), info["password"].toString(), 0, info["name"].toString(), info["phonenumber"].toString(), info["address"].toString());
         break;
     case ADMINISTRATOR:
         return "管理员类不支持注册";
@@ -181,13 +184,13 @@ QString UserManage::registerUser(const QJsonObject &token, const QString &userna
     case EXPRESSMAN:
         if (verify(token).isEmpty() || userMap[verify(token)]->getUserType() != ADMINISTRATOR)
             return "只有管理员类才能注册快递员";
-        user = QSharedPointer<Expressman>::create(username, password, 0, name, phoneNumber, address);
+        user = QSharedPointer<Expressman>::create(info["username"].toString(), info["password"].toString(), 0, info["name"].toString(), info["phonenumber"].toString(), info["address"].toString());
         break;
     }
 
     user->insertInfo2DB(db);
 
-    qDebug() << username << " 注册成功";
+    qDebug() << info["username"].toString() << " 注册成功";
     return {};
 }
 
@@ -281,7 +284,7 @@ QString UserManage::queryAllUserInfo(const QJsonObject &token, QJsonArray &ret) 
     return {};
 }
 
-QString UserManage::sendItem(const QJsonObject &token, const QJsonObject &info) const
+QString UserManage::sendItem(const QJsonObject &token, const QJsonObject &info, int &retCost) const
 {
     QString username = verify(token);
     if (username.isEmpty())
@@ -299,34 +302,32 @@ QString UserManage::sendItem(const QJsonObject &token, const QJsonObject &info) 
     if (user->getUserType() != CUSTOMER)
         return "你只能给用户寄出快递";
 
-    int cost = 0;
     switch (info["type"].toInt())
     {
     case FRAGILE:
-        cost = info["amount"].toInt() * FRAGILE_ITEM_PRICE;
+        retCost = info["amount"].toInt() * FRAGILE_ITEM_PRICE;
         break;
     case BOOK:
-        cost = info["amount"].toInt() * BOOK_PRICE;
+        retCost = info["amount"].toInt() * BOOK_PRICE;
         break;
     case NORMAL:
-        cost = info["amount"].toInt() * NORMAL_ITEM_PRICE;
+        retCost = info["amount"].toInt() * NORMAL_ITEM_PRICE;
         break;
     default:
         return "快递类型有误";
     }
 
-    QString ret = transferBalance(token, cost, "admin");
+    QString ret = transferBalance(token, retCost, "admin");
     if (!ret.isEmpty())
         return ret;
 
     Time sendingTime(Time::getCurYear(), Time::getCurMonth(), Time::getCurDay());
-    int id = itemManage->insertItem(cost, info["type"].toInt(), PENDING_REVEICING, sendingTime, Time(-1, -1, -1), username, info["dstName"].toString(), "未分配", info["description"].toString());
+    int id = itemManage->insertItem(retCost, info["type"].toInt(), PENDING_REVEICING, sendingTime, Time(-1, -1, -1), username, info["dstName"].toString(), "未分配", info["description"].toString());
     qDebug() << "添加快递单号为" << id;
-    ret = QString::number(cost);
-    return ret;
+    return {};
 }
 
-QString UserManage::deliveryItem(const QJsonObject &token, const QJsonObject &info) const
+QString UserManage::deliveryItem(const QJsonObject &token, const int id) const
 {
     QString username = verify(token);
     if (username.isEmpty())
@@ -334,11 +335,8 @@ QString UserManage::deliveryItem(const QJsonObject &token, const QJsonObject &in
     if (userMap[username]->getUserType() != EXPRESSMAN)
         return "非快递员不能运送快递";
 
-    if (!info.contains("itemId"))
-        return "快递物品信息不全";
-
     QSharedPointer<Item> result;
-    if (!itemManage->queryById(result, info["itemId"].toInt()))
+    if (!itemManage->queryById(result, id))
         return "不存在运单号为该ID的物品";
     if (result->getState() != PENDING_REVEICING)
         return "该快递已发出";
@@ -349,13 +347,13 @@ QString UserManage::deliveryItem(const QJsonObject &token, const QJsonObject &in
     if (!ret.isEmpty())
         return ret;
 
-    if (itemManage->modifyState(info["itemId"].toInt(), PENDING_REVEICING))
+    if (itemManage->modifyState(id, PENDING_REVEICING))
         return {};
     else
         return "修改失败";
 }
 
-QString UserManage::receiveItem(const QJsonObject &token, const QJsonObject &info) const
+QString UserManage::receiveItem(const QJsonObject &token, const int id) const
 {
     QString username = verify(token);
     if (username.isEmpty())
@@ -363,11 +361,8 @@ QString UserManage::receiveItem(const QJsonObject &token, const QJsonObject &inf
     if (userMap[username]->getUserType() != CUSTOMER)
         return "非用户不能接收快递";
 
-    if (!info.contains("id"))
-        return "快递物品信息不全";
-
     QSharedPointer<Item> result;
-    if (!itemManage->queryById(result, info["id"].toInt()))
+    if (!itemManage->queryById(result, id))
         return "不存在运单号为该ID的物品";
     if (result->getDstName() != username)
         return "这不是您的快递";
@@ -376,7 +371,7 @@ QString UserManage::receiveItem(const QJsonObject &token, const QJsonObject &inf
     if (result->getState() == RECEIVED)
         return "该快递已签收";
 
-    if (itemManage->modifyState(info["id"].toInt(), RECEIVED) && itemManage->modifyReceivingTime(info["id"].toInt(), Time(Time::getCurYear(), Time::getCurMonth(), Time::getCurDay())))
+    if (itemManage->modifyState(id, RECEIVED) && itemManage->modifyReceivingTime(id, Time(Time::getCurYear(), Time::getCurMonth(), Time::getCurDay())))
         return {};
     else
         return "接收失败";

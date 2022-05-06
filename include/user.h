@@ -305,17 +305,23 @@ public:
      * @brief 注册
      *
      * @param token 凭据
-     * @param username 用户名
-     * @param password 密码
-     * @param type 注册的账号类型 0为CUSTOMER, 2为EXPRESSMAN(Phase2开始出现)
-     * @param name 姓名
-     * @param phoneNumber 电话号码
-     * @param address 地址
+     * @param info 用户信息
      * @return QString 如果注册成功，返回空串，否则返回错误信息.
      * @note ADMINISTRATOR不用支持注册.
      * @note register是关键字，不能作为函数名.
+     * @note 用户信息的格式：
+     * ```json
+     * {
+     *    "username": <字符串>,
+     *    "password": <username>,
+     *    "type": <整数>,
+     *    "name": <字符串>,
+     *    "phonenumber": <字符串>,
+     *    "address": <字符串>,
+     * }
+     * ```
      */
-    QString registerUser(const QJsonObject &token, const QString &username, const QString &password, int type, const QString &name, const QString &phoneNumber, const QString &address) const;
+    QString registerUser(const QJsonObject &token, const QJsonObject &info) const;
 
     /**
      * @brief 删除快递员
@@ -359,8 +365,7 @@ public:
      * @param token 凭据
      * @param ret 用户信息
      * @return 如果获取成功，返回空串，否则返回错误信息
-     *
-     * 用户信息的格式：
+     * @note 用户信息的格式：
      * ```json
      * {
      *    "username": <字符串>,
@@ -479,6 +484,7 @@ public:
      * @brief 发送快递物品
      * @param token 凭据
      * @param info 快递物品信息
+     * @param retCost 返回寄送快递的花费
      * @return QString 发送成功则返回一个可以转换为整数的QString，否则返回错误信息
      * @note 物品信息格式:
      * ```json
@@ -489,33 +495,23 @@ public:
      *      "description" : <字符串>
      * }
      */
-    QString sendItem(const QJsonObject &token, const QJsonObject &info) const;
+    QString sendItem(const QJsonObject &token, const QJsonObject &info, int &retCost) const;
 
     /**
      * @brief 运送快递物品
      * @param token 凭据
-     * @param info 快递物品信息
+     * @param id 快递物品单号
      * @return QString
-     * @note 物品信息格式:
-     * ```json
-     * {
-     *      "id" : <整数>
-     * }
      */
-    QString deliveryItem(const QJsonObject &token, const QJsonObject &info) const;
+    QString deliveryItem(const QJsonObject &token, const int id) const;
 
     /**
      * @brief 发送快递物品
      * @param token 凭据
-     * @param info 快递物品信息
+     * @param id 快递物品单号
      * @return QString 成功则返回空串，否则返回错误信息
-     * @note 物品信息格式:
-     * ```json
-     * {
-     *      "id" : <整数>
-     * }
      */
-    QString receiveItem(const QJsonObject &token, const QJsonObject &info) const;
+    QString receiveItem(const QJsonObject &token, const int id) const;
 
     /**
      * @brief 为快递指定一个快递员
