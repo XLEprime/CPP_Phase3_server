@@ -17,11 +17,6 @@ void User::insertInfo2DB(Database *db)
     db->insertUser(username, password, type, 0, name, phoneNumber, address);
 }
 
-// int Administrator::queryAllUserInfo(QList<QSharedPointer<User>> &result, Database *db) const
-// {
-//     return db->queryAllUser(result);
-// }
-
 QString UserManage::verify(const QJsonObject &token) const
 {
     if (!token.contains("username") ||
@@ -250,8 +245,8 @@ QString UserManage::getUserInfo(const QJsonObject &token, QJsonObject &ret) cons
         return "验证失败";
     qDebug() << "获取用户" << username << " 的信息";
     ret.insert("username", username);
-    ret.insert("type", userMap[username]->getUserType());
     ret.insert("balance", userMap[username]->getBalance());
+    ret.insert("type", userMap[username]->getUserType());
     ret.insert("name", userMap[username]->getName());
     ret.insert("phonenumber", userMap[username]->getPhoneNumber());
     ret.insert("address", userMap[username]->getAddress());

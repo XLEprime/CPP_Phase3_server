@@ -4,7 +4,7 @@ project(CPP_Phase3_Server)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(CMAKE_PREFIX_PATH "D:/develop/Qt/5.12.2/mingw73_64")
+set(CMAKE_PREFIX_PATH "D:\\develop\\Qt\\5.15.2\\mingw81_64")
 
 find_package(Qt5 COMPONENTS Sql Network REQUIRED)
 set(CMAKE_AUTOMOC ON)

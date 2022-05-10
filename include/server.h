@@ -40,9 +40,9 @@ private:
         assign,           //为一个快递指定快递员
         delivery,         //运送一个快递
         addBalance,       //充值
-        query, //查询符合条件的快递
-        send,   //发送快递
-        receive //接收快递
+        query,            //查询符合条件的快递
+        send,             //发送快递
+        receive           //接收快递
     };
 
     /**
@@ -102,10 +102,9 @@ private:
 
     /**
      * @brief 处理查询系统时间
-     * @param payload 有效载荷
      * @return QByteArray
      */
-    QByteArray timeHandler(const QJsonObject &payload) const;
+    QByteArray timeHandler() const;
 
     /**
      * @brief 处理加快系统时间

@@ -31,10 +31,12 @@ void Server::messageHandler()
         int type = json["type"].toInt();
         QJsonObject payload = json["payload"].toObject();
 
+        qDebug() << "收到报文，类型为" << type;
+
         switch (type)
         {
         case time:
-            res = timeHandler(payload);
+            res = timeHandler();
             break;
         case addTime:
             res = addTimeHandler(payload);
@@ -52,7 +54,7 @@ void Server::messageHandler()
             res = changePasswordHandler(payload);
             break;
         case info:
-            res = registerHandler(payload);
+            res = infoHandler(payload);
             break;
         case allUserInfo:
             res = allUserInfoHandler(payload);
@@ -153,7 +155,7 @@ void Server::constructRet(QJsonObject &ret, const QString &res, const QJsonValue
     }
 }
 
-QByteArray Server::timeHandler(const QJsonObject &payload) const
+QByteArray Server::timeHandler() const
 {
     QJsonObject ret, retTime;
     QString response = Time::getTime(retTime);
@@ -356,7 +358,9 @@ QByteArray Server::sendHandler(const QJsonObject &payload) const
         constructRet(ret);
     else
     {
-        QString response = userManage->sendItem(jwtGetPayload(payload["token"].toString()), payload["info"].toObject(), cost);
+        QJsonObject info(payload);
+        info.remove("token");
+        QString response = userManage->sendItem(jwtGetPayload(payload["token"].toString()), info, cost);
         constructRet(ret, response, cost);
     }
     return QByteArray(QJsonDocument(ret).toJson(QJsonDocument::Compact));
