@@ -55,6 +55,7 @@ int main(int argc, char * argv[])
     ItemManage itemManage(&database);
     UserManage userManage(&database, &itemManage);
     Server server(&a, 8946, &userManage);
+    Time::init();
 
     return a.exec();
 }

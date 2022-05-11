@@ -354,7 +354,7 @@ QByteArray Server::sendHandler(const QJsonObject &payload) const
 {
     QJsonObject ret;
     int cost;
-    if (!payload.contains("token") || !jwtVerify(payload["token"].toString(), secret) || !payload.contains("info"))
+    if (!payload.contains("token") || !jwtVerify(payload["token"].toString(), secret))
         constructRet(ret);
     else
     {
