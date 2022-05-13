@@ -179,13 +179,11 @@ QByteArray Server::addTimeHandler(const QJsonObject &payload) const
 QByteArray Server::registerHandler(const QJsonObject &payload) const
 {
     QJsonObject ret;
-    if (!payload.contains("token") || !jwtVerify(payload["token"].toString(), secret) || !payload.contains("name") || !payload.contains("phoneNumber") || !payload.contains("address"))
+    if (!payload.contains("username") || !payload.contains("password") || !payload.contains("name") || !payload.contains("phonenumber") || !payload.contains("address"))
         constructRet(ret);
     else
     {
-        QJsonObject info(payload);
-        info.remove("token");
-        QString res = userManage->registerUser(jwtGetPayload(payload["token"].toString()), info);
+        QString res = userManage->registerUser(payload);
         constructRet(ret, res);
     }
     return QByteArray(QJsonDocument(ret).toJson(QJsonDocument::Compact));
@@ -269,13 +267,14 @@ QByteArray Server::allUserInfoHandler(const QJsonObject &payload) const
 QByteArray Server::addExpressmanHandler(const QJsonObject &payload) const
 {
     QJsonObject ret;
-    if (!payload.contains("token") || !jwtVerify(payload["token"].toString(), secret) || !payload.contains("username") || !payload.contains("password") || !payload.contains("name") || !payload.contains("phoneNumber") || !payload.contains("address"))
+    if (!payload.contains("token") || !jwtVerify(payload["token"].toString(), secret) || !payload.contains("username") || !payload.contains("password") || !payload.contains("name") || !payload.contains("phonenumber") || !payload.contains("address"))
         constructRet(ret);
     else
     {
         QJsonObject info(payload);
         info.remove("token");
-        QString res = userManage->registerUser(jwtGetPayload(payload["token"].toString()), info);
+        QString res = userManage->registerExpressman(jwtGetPayload(payload["token"].toString()), info);
+        constructRet(ret, res);
     }
     return QByteArray(QJsonDocument(ret).toJson(QJsonDocument::Compact));
 }

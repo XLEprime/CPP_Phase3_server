@@ -302,8 +302,7 @@ public:
     UserManage(Database *_db, ItemManage *_itemManage) : db(_db), itemManage(_itemManage) {}
 
     /**
-     * @brief 注册
-     *
+     * @brief 注册普通用户
      * @param token 凭据
      * @param info 用户信息
      * @return QString 如果注册成功，返回空串，否则返回错误信息.
@@ -321,7 +320,26 @@ public:
      * }
      * ```
      */
-    QString registerUser(const QJsonObject &token, const QJsonObject &info) const;
+    QString registerUser(const QJsonObject &info) const;
+
+    /**
+     * @brief 注册快递员
+     * @param token 凭据
+     * @param info 用户信息
+     * @return QString 如果注册成功，返回空串，否则返回错误信息.
+     * @note 用户信息的格式：
+     * ```json
+     * {
+     *    "username": <字符串>,
+     *    "password": <username>,
+     *    "type": <整数>,
+     *    "name": <字符串>,
+     *    "phonenumber": <字符串>,
+     *    "address": <字符串>,
+     * }
+     * ```
+     */
+    QString registerExpressman(const QJsonObject &token, const QJsonObject &info) const;
 
     /**
      * @brief 删除快递员

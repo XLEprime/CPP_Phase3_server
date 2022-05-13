@@ -157,7 +157,25 @@ QString UserManage::queryItem(const QJsonObject &token, const QJsonObject &filte
     return {};
 }
 
-QString UserManage::registerUser(const QJsonObject &token, const QJsonObject &info) const
+QString UserManage::registerUser(const QJsonObject &info) const
+{
+    if (!info.contains("username") || !info.contains("password") || !info.contains("type") || !info.contains("name") || !info.contains("phonenumber") || !info.contains("address"))
+        return "用户信息不全";
+
+    if (info["username"].toString().isEmpty() || info["username"].toString().size() > 10)
+        return "用户名长度应该在1~10之间";
+    if (db->queryUserByName(info["username"].toString()))
+        return "该用户名已被注册";
+
+    QSharedPointer<User> user = QSharedPointer<Customer>::create(info["username"].toString(), info["password"].toString(), 0, info["name"].toString(), info["phonenumber"].toString(), info["address"].toString());
+
+    user->insertInfo2DB(db);
+
+    qDebug() << info["username"].toString() << " 注册成功";
+    return {};
+}
+
+QString UserManage::registerExpressman(const QJsonObject &token, const QJsonObject &info) const
 {
     if (!info.contains("username") || !info.contains("password") || !info.contains("type") || !info.contains("name") || !info.contains("phonenumber") || !info.contains("address"))
         return "用户信息不全";
@@ -333,7 +351,7 @@ QString UserManage::deliveryItem(const QJsonObject &token, const int id) const
     QSharedPointer<Item> result;
     if (!itemManage->queryById(result, id))
         return "不存在运单号为该ID的物品";
-    if (result->getState() != PENDING_REVEICING)
+    if (result->getState() != PENDING_COLLECTING)
         return "该快递已发出";
     if (result->getExpressman() != username)
         return "这不是你所属的快递";
@@ -386,6 +404,8 @@ QString UserManage::assignExpressman(const QJsonObject &token, const QJsonObject
     QSharedPointer<Item> result;
     if (!itemManage->queryById(result, info["itemId"].toInt()))
         return "不存在运单号为该ID的物品";
+    if (result->getExpressman() != "未分配")
+        return "该快递已分配快递员";
 
     QSharedPointer<User> user = db->queryUserByName(info["expressman"].toString());
     if (!user)
