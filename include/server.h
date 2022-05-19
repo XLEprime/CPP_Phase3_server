@@ -42,7 +42,8 @@ private:
         addBalance,       //充值
         query,            //查询符合条件的快递
         send,             //发送快递
-        receive           //接收快递
+        receive,          //接收快递
+        deleteItem        //删除快递
     };
 
     /**
@@ -211,6 +212,13 @@ private:
      * @return QByteArray
      */
     QByteArray receiveHandler(const QJsonObject &payload) const;
+
+    /**
+     * @brief 删除快递
+     * @param payload 有效载荷
+     * @return QByteArray
+     */
+    QByteArray deleteItemHandler(const QJsonObject &payload) const;
 };
 
 #endif

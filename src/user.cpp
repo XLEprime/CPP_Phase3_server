@@ -424,3 +424,21 @@ QString UserManage::assignExpressman(const QJsonObject &token, const QJsonObject
     else
         return "修改失败";
 }
+
+QString UserManage::deleteItem(const QJsonObject &token, const int id) const
+{
+    QString username = verify(token);
+    if (username.isEmpty())
+        return "验证失败";
+    if (userMap[username]->getUserType() != ADMINISTRATOR)
+        return "非管理员不能删除快递";
+
+    QSharedPointer<Item> result;
+    if (!itemManage->queryById(result, id))
+        return "不存在运单号为该ID的物品";
+
+    if (itemManage->deleteItem(id))
+        return {};
+    else
+        return "删除快递失败";
+}

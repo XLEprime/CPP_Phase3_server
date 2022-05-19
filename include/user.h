@@ -544,6 +544,14 @@ public:
      */
     QString assignExpressman(const QJsonObject &token, const QJsonObject &info) const;
 
+    /**
+     * @brief 删除快递物品
+     * @param token 凭据
+     * @param id 快递物品单号
+     * @return QString 成功则返回空串，否则返回错误信息
+     */
+    QString deleteItem(const QJsonObject &token, const int id) const;
+
 private:
     QMap<QString, QSharedPointer<User>> userMap; //用户名到用户对象的映射.
     Database *db;                                //数据库

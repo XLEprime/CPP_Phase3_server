@@ -83,6 +83,9 @@ void Server::messageHandler()
         case receive:
             res = receiveHandler(payload);
             break;
+        case deleteItem:
+            res = deleteItemHandler(payload);
+            break;
         default:
             break;
         }
@@ -373,6 +376,19 @@ QByteArray Server::receiveHandler(const QJsonObject &payload) const
     else
     {
         QString response = userManage->receiveItem(jwtGetPayload(payload["token"].toString()), payload["id"].toInt());
+        constructRet(ret, response);
+    }
+    return QByteArray(QJsonDocument(ret).toJson(QJsonDocument::Compact));
+}
+
+QByteArray Server::deleteItemHandler(const QJsonObject &payload) const
+{
+    QJsonObject ret;
+    if (!payload.contains("token") || !jwtVerify(payload["token"].toString(), secret) || !payload.contains("id"))
+        constructRet(ret);
+    else
+    {
+        QString response = userManage->deleteItem(jwtGetPayload(payload["token"].toString()), payload["id"].toInt());
         constructRet(ret, response);
     }
     return QByteArray(QJsonDocument(ret).toJson(QJsonDocument::Compact));
