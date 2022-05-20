@@ -22,6 +22,7 @@
 #define ANSI_COLOR_WHITE "\x1b[37m"
 #define ANSI_COLOR_RESET "\x1b[0m"
 
+//Qt自带的输出详细日志 可以删除
 void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
     QByteArray localMsg = msg.toLocal8Bit();
