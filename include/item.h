@@ -356,7 +356,7 @@ public:
     bool modifyReceivingTime(const int id, const Time &receivingTime);
 
     /**
-     * @brief 修改快递员
+     * @brief 修改物品的快递员
      * @param id 物品单号
      * @param expressman 快递员
      * @return true 修改成功

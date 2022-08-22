@@ -231,14 +231,6 @@ public:
      * @note 0为CUSTOMER 1为ADMINISTRATOR
      */
     int getUserType() const override { return type; }
-
-    // /**
-    //  * @brief 查询所有用户
-    //  * @param result 用于返回结果
-    //  * @param db 要查询的数据库
-    //  * @return int 查到符合条件的数量
-    //  */
-    // int queryAllUserInfo(QList<QSharedPointer<User>> &result, Database *db) const;
 };
 
 /**
@@ -438,6 +430,7 @@ public:
      * {
      *      "type": 0
      *      可选："id" : <整数>,
+     *      可选："state" : <整数>,
      *      可选："sendingTime_Year" : <整数>,
      *      可选："sendingTime_Month" : <整数>,
      *      可选："sendingTime_Day" : <整数>,
@@ -453,6 +446,7 @@ public:
      * {
      *      "type": 1,
      *      可选："id" : <整数>,
+     *      可选："state" : <整数>,
      *      可选："sendingTime_Year" : <整数>,
      *      可选："sendingTime_Month" : <整数>,
      *      可选："sendingTime_Day" : <整数>,
@@ -469,6 +463,7 @@ public:
      * {
      *      "type": 2,
      *      可选："id" : <整数>,
+     *      可选："state" : <整数>,
      *      可选："sendingTime_Year" : <整数>,
      *      可选："sendingTime_Month" : <整数>,
      *      可选："sendingTime_Day" : <整数>,
@@ -503,7 +498,7 @@ public:
      * @param token 凭据
      * @param info 快递物品信息
      * @param retCost 返回寄送快递的花费
-     * @return QString 发送成功则返回一个可以转换为整数的QString，否则返回错误信息
+     * @return QString 发送成功则空串，否则返回错误信息
      * @note 物品信息格式:
      * ```json
      * {
